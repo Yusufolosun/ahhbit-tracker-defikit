@@ -43,6 +43,11 @@
     "vitest": "^4.0.18"
   },
   "keywords": [
+    "smart-contract",
+    "crypto",
+    "cryptocurrency",
+    "bitcoin",
+    "btc",
     "defi",
     "finance",
     "basis-points",
@@ -53,6 +58,7 @@
     "swap",
     "fee",
     "yield",
+    "clarity",
     "apr",
     "apy",
     "token",
@@ -70,11 +76,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/Yusufolosun/AhhbitTracker.git",
-    "directory": "packages/defikit"
+    "url": "https://github.com/Yusufolosun/ahhbit-tracker-defikit.git"
   },
   "bugs": {
-    "url": "https://github.com/Yusufolosun/AhhbitTracker/issues"
+    "url": "https://github.com/Yusufolosun/ahhbit-tracker-defikit/issues"
   },
-  "homepage": "https://github.com/Yusufolosun/AhhbitTracker/tree/main/packages/defikit#readme"
+  "homepage": "https://github.com/Yusufolosun/ahhbit-tracker-defikit",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/Yusufolosun"
+  }
 }
