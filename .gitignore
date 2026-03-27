@@ -7,6 +7,25 @@ dist/
 .env
 .env.*
 !.env.example
+.envrc
+
+# Secrets and keys (never commit)
+.npmrc
+!.npmrc.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+*.seed
+*.mnemonic
+*.secret
+id_rsa
+id_ed25519
+wallet.dat
+secrets/
+secret/
+private/
 
 # Coverage
 coverage/
