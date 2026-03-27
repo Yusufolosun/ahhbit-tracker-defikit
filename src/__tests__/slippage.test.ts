@@ -46,4 +46,17 @@ describe('slippage', () => {
     expect(min).toBeLessThan(large);
     expect(min).toBeGreaterThan(0n);
   });
+
+  it('throws on invalid tolerance bps', () => {
+    expect(() => slippage.minOutput(1_000n, -1)).toThrow(RangeError);
+    expect(() => slippage.maxInput(1_000n, 10_001)).toThrow(RangeError);
+    expect(() => slippage.isExcessive(1_000n, 995n, 0.5)).toThrow(RangeError);
+  });
+
+  it('throws on negative amounts', () => {
+    expect(() => slippage.minOutput(-1n, 50)).toThrow(RangeError);
+    expect(() => slippage.maxInput(-1n, 50)).toThrow(RangeError);
+    expect(() => slippage.isExcessive(1_000n, -1n, 50)).toThrow(RangeError);
+    expect(() => slippage.fromAmounts(-1n, 1n)).toThrow(RangeError);
+  });
 });
