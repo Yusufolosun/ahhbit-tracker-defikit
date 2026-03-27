@@ -157,6 +157,7 @@ yieldMath.compoundedReturn(1000, 10, 365, 1)  // 1105.16
 - **Numbers for rates/percentages** — practical for display and small values
 - **Floor rounding on fees** — rounding always favors the user
 - **Ceiling rounding on required inputs** — ensures sufficient coverage
+- **Strict input validation** — invalid bps, decimals, and malformed amounts fail fast
 - **Zero dependencies** — nothing to audit, nothing to break
 - **Chain-agnostic** — works with Ethereum, Solana, Stacks, or any chain
 
@@ -190,14 +191,14 @@ yieldMath.compoundedReturn(1000, 10, 365, 1)  // 1105.16
 | `isExcessive` | `(expected: bigint, actual: bigint, toleranceBps: number) → boolean` | Check if slippage exceeds tolerance |
 | `fromAmounts` | `(expected: bigint, actual: bigint) → number` | Realized slippage in bps |
 
-### amm.constantProduct
+### amm
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `getOutputAmount` | `(amountIn, reserveIn, reserveOut, feeBps?) → bigint` | Output from constant-product curve |
-| `getInputAmount` | `(amountOut, reserveIn, reserveOut, feeBps?) → bigint` | Required input (ceiling) |
-| `priceImpact` | `(amountIn, reserveIn, reserveOut) → number` | Impact in basis points |
-| `spotPrice` | `(reserveIn, reserveOut, decimalsIn, decimalsOut) → number` | Decimal-adjusted spot price |
+| `constantProduct.getOutputAmount` | `(amountIn, reserveIn, reserveOut, feeBps?) → bigint` | Output from constant-product curve |
+| `constantProduct.getInputAmount` | `(amountOut, reserveIn, reserveOut, feeBps?) → bigint` | Required input (ceiling) |
+| `constantProduct.priceImpact` | `(amountIn, reserveIn, reserveOut) → number` | Impact in basis points |
+| `constantProduct.spotPrice` | `(reserveIn, reserveOut, decimalsIn, decimalsOut) → number` | Decimal-adjusted spot price |
 | `impermanentLoss` | `(priceRatio: number) → number` | IL as negative decimal |
 
 ### tokenAmount

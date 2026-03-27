@@ -56,7 +56,7 @@ export function onInput(amount: bigint, bps: number): FeeResult {
  * so that after fee deduction, `amount` remains.
  * gross = ceil(amount * 10000 / (10000 - bps))
  *
- * Example: onOutput(997_000n, 30) → { fee: 3_009n, gross: 1_000_009n }
+ * Example: onOutput(997_000n, 30) → { fee: 3_000n, gross: 1_000_000n }
  */
 export function onOutput(amount: bigint, bps: number): GrossFeeResult {
   assertNonNegativeAmount('amount', amount);
