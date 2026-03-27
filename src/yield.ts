@@ -2,6 +2,18 @@
  * Yield / interest rate conversions.
  */
 
+function assertFiniteNumber(name: string, value: number): void {
+  if (!Number.isFinite(value)) {
+    throw new RangeError(`${name} must be a finite number, got ${value}`);
+  }
+}
+
+function assertPositiveInteger(name: string, value: number): void {
+  if (!Number.isInteger(value) || value <= 0) {
+    throw new RangeError(`${name} must be a positive integer, got ${value}`);
+  }
+}
+
 /**
  * Convert APR to APY given a compounding frequency.
  * APY = (1 + APR/n)^n - 1
@@ -13,9 +25,8 @@
  * Example: aprToApy(10, 365) → ~10.5156
  */
 export function aprToApy(apr: number, compoundsPerYear: number): number {
-  if (compoundsPerYear <= 0) {
-    throw new RangeError(`compoundsPerYear must be positive, got ${compoundsPerYear}`);
-  }
+  assertFiniteNumber('apr', apr);
+  assertPositiveInteger('compoundsPerYear', compoundsPerYear);
   const rate = apr / 100;
   return ((1 + rate / compoundsPerYear) ** compoundsPerYear - 1) * 100;
 }
@@ -29,9 +40,8 @@ export function aprToApy(apr: number, compoundsPerYear: number): number {
  * @returns APR as a percentage
  */
 export function apyToApr(apy: number, compoundsPerYear: number): number {
-  if (compoundsPerYear <= 0) {
-    throw new RangeError(`compoundsPerYear must be positive, got ${compoundsPerYear}`);
-  }
+  assertFiniteNumber('apy', apy);
+  assertPositiveInteger('compoundsPerYear', compoundsPerYear);
   const rate = apy / 100;
   return compoundsPerYear * ((1 + rate) ** (1 / compoundsPerYear) - 1) * 100;
 }
@@ -42,6 +52,7 @@ export function apyToApr(apy: number, compoundsPerYear: number): number {
  * @returns Daily rate as a percentage
  */
 export function dailyRate(annualRate: number): number {
+  assertFiniteNumber('annualRate', annualRate);
   return annualRate / 365;
 }
 
@@ -60,9 +71,16 @@ export function compoundedReturn(
   compoundsPerYear: number,
   years: number,
 ): number {
-  if (compoundsPerYear <= 0) {
-    throw new RangeError(`compoundsPerYear must be positive, got ${compoundsPerYear}`);
+  assertFiniteNumber('principal', principal);
+  assertFiniteNumber('apr', apr);
+  assertFiniteNumber('years', years);
+  if (principal < 0) {
+    throw new RangeError(`principal must be non-negative, got ${principal}`);
   }
+  if (years < 0) {
+    throw new RangeError(`years must be non-negative, got ${years}`);
+  }
+  assertPositiveInteger('compoundsPerYear', compoundsPerYear);
   const rate = apr / 100;
   return principal * (1 + rate / compoundsPerYear) ** (compoundsPerYear * years);
 }

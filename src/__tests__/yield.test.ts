@@ -28,6 +28,15 @@ describe('yieldMath', () => {
     it('throws on negative compoundsPerYear', () => {
       expect(() => yieldMath.aprToApy(10, -1)).toThrow(RangeError);
     });
+
+    it('throws on non-integer compoundsPerYear', () => {
+      expect(() => yieldMath.aprToApy(10, 365.5)).toThrow(RangeError);
+    });
+
+    it('throws on non-finite apr', () => {
+      expect(() => yieldMath.aprToApy(Number.NaN, 365)).toThrow(RangeError);
+      expect(() => yieldMath.aprToApy(Number.POSITIVE_INFINITY, 365)).toThrow(RangeError);
+    });
   });
 
   describe('apyToApr', () => {
@@ -46,12 +55,20 @@ describe('yieldMath', () => {
     it('throws on zero compoundsPerYear', () => {
       expect(() => yieldMath.apyToApr(10, 0)).toThrow(RangeError);
     });
+
+    it('throws on non-finite apy', () => {
+      expect(() => yieldMath.apyToApr(Number.NaN, 365)).toThrow(RangeError);
+    });
   });
 
   describe('dailyRate', () => {
     it('divides annual rate by 365', () => {
       expect(yieldMath.dailyRate(365)).toBeCloseTo(1, 10);
       expect(yieldMath.dailyRate(10)).toBeCloseTo(10 / 365, 10);
+    });
+
+    it('throws on non-finite annual rate', () => {
+      expect(() => yieldMath.dailyRate(Number.NaN)).toThrow(RangeError);
     });
   });
 
@@ -74,6 +91,18 @@ describe('yieldMath', () => {
 
     it('throws on zero compoundsPerYear', () => {
       expect(() => yieldMath.compoundedReturn(1000, 10, 0, 1)).toThrow(RangeError);
+    });
+
+    it('throws on invalid principal and years', () => {
+      expect(() => yieldMath.compoundedReturn(-1, 10, 365, 1)).toThrow(RangeError);
+      expect(() => yieldMath.compoundedReturn(1000, 10, 365, -1)).toThrow(RangeError);
+    });
+
+    it('throws on non-finite inputs', () => {
+      expect(() => yieldMath.compoundedReturn(1000, Number.NaN, 365, 1)).toThrow(RangeError);
+      expect(() => yieldMath.compoundedReturn(1000, 10, 365, Number.POSITIVE_INFINITY)).toThrow(
+        RangeError,
+      );
     });
   });
 });
