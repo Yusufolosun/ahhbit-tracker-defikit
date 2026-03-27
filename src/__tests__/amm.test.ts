@@ -109,9 +109,8 @@ describe('amm.constantProduct', () => {
       const reserveA = 1_000n * 10n ** 8n;
       const reserveB = 3_000n * 10n ** 6n;
       const price = constantProduct.spotPrice(reserveA, reserveB, 8, 6);
-      // ratio = 3_000_000_000 / 100_000_000_000 = 0.03, scale = 10^(6-8) = 0.01
-      // price = 0.03 * 0.01 = 0.0003
-      expect(price).toBeCloseTo(0.0003, 8);
+      // Human price = (reserveB / 10^6) / (reserveA / 10^8) = 3000 / 1000 = 3
+      expect(price).toBeCloseTo(3, 10);
     });
 
     it('returns 0 for zero reserves', () => {

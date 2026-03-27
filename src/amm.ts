@@ -109,7 +109,7 @@ export const constantProduct = {
     assertNonNegativeInteger('decimalsIn', decimalsIn);
     assertNonNegativeInteger('decimalsOut', decimalsOut);
     if (reserveIn === 0n) return 0;
-    const scale = 10 ** (decimalsOut - decimalsIn);
+    const scale = 10 ** (decimalsIn - decimalsOut);
     return (Number(reserveOut) / Number(reserveIn)) * scale;
   },
 };
