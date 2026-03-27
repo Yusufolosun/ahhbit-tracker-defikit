@@ -32,8 +32,8 @@ export function fromDecimal(decimal: number): number {
  * @param basisPoints — must be a non-negative integer (0–10000)
  */
 export function apply(amount: bigint, basisPoints: number): bigint {
-  if (!Number.isInteger(basisPoints) || basisPoints < 0) {
-    throw new RangeError(`basisPoints must be a non-negative integer, got ${basisPoints}`);
+  if (!Number.isInteger(basisPoints) || basisPoints < 0 || basisPoints > MAX) {
+    throw new RangeError(`basisPoints must be an integer 0–${MAX}, got ${basisPoints}`);
   }
   return (amount * BigInt(basisPoints)) / BigInt(BPS_DIVISOR);
 }

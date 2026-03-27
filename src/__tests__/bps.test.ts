@@ -66,4 +66,9 @@ describe('bps', () => {
     expect(bps.apply(1_000_000n, bps.MAX)).toBe(1_000_000n);
     expect(bps.complement(1_000_000n, bps.MAX)).toBe(0n);
   });
+
+  it('throws on basisPoints above MAX', () => {
+    expect(() => bps.apply(1_000_000n, bps.MAX + 1)).toThrow(RangeError);
+    expect(() => bps.complement(1_000_000n, bps.MAX + 1)).toThrow(RangeError);
+  });
 });
