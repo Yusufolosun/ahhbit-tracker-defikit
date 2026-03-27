@@ -36,6 +36,20 @@ describe('tokenAmount', () => {
     it('handles zero decimals', () => {
       expect(tokenAmount.fromHuman('100', 0)).toBe(100n);
     });
+
+    it('accepts leading plus sign', () => {
+      expect(tokenAmount.fromHuman('+1.5', 6)).toBe(1_500_000n);
+    });
+
+    it('throws on invalid amount strings', () => {
+      expect(() => tokenAmount.fromHuman('abc', 6)).toThrow(SyntaxError);
+      expect(() => tokenAmount.fromHuman('1.2.3', 6)).toThrow(SyntaxError);
+    });
+
+    it('throws on invalid decimals', () => {
+      expect(() => tokenAmount.fromHuman('1', -1)).toThrow(RangeError);
+      expect(() => tokenAmount.fromHuman('1', 1.5)).toThrow(RangeError);
+    });
   });
 
   describe('toHuman', () => {
@@ -66,6 +80,10 @@ describe('tokenAmount', () => {
     it('handles zero decimals', () => {
       expect(tokenAmount.toHuman(100n, 0)).toBe('100');
     });
+
+    it('throws on invalid decimals', () => {
+      expect(() => tokenAmount.toHuman(100n, -1)).toThrow(RangeError);
+    });
   });
 
   describe('format', () => {
@@ -78,6 +96,11 @@ describe('tokenAmount', () => {
     it('without displayDecimals strips trailing zeros', () => {
       expect(tokenAmount.format(1_500_000n, 6)).toBe('1.5');
       expect(tokenAmount.format(1_000_000n, 6)).toBe('1');
+    });
+
+    it('throws on invalid decimal arguments', () => {
+      expect(() => tokenAmount.format(1_000_000n, -1, 2)).toThrow(RangeError);
+      expect(() => tokenAmount.format(1_000_000n, 6, -1)).toThrow(RangeError);
     });
   });
 
@@ -93,6 +116,11 @@ describe('tokenAmount', () => {
     it('returns same value for equal decimals', () => {
       expect(tokenAmount.scale(1_500_000n, 6, 6)).toBe(1_500_000n);
     });
+
+    it('throws on invalid decimal arguments', () => {
+      expect(() => tokenAmount.scale(1n, -1, 6)).toThrow(RangeError);
+      expect(() => tokenAmount.scale(1n, 6, 1.5)).toThrow(RangeError);
+    });
   });
 
   describe('roundtrip', () => {
@@ -107,11 +135,6 @@ describe('tokenAmount', () => {
   describe('edge cases', () => {
     it('fromHuman handles leading/trailing whitespace', () => {
       expect(tokenAmount.fromHuman('  1.5  ', 6)).toBe(1_500_000n);
-    });
-
-    it('fromHuman handles multiple decimal points by using first two parts', () => {
-      // split('.') takes first two parts, drops the rest — not a crash
-      expect(tokenAmount.fromHuman('1.2.3', 6)).toBe(1_200_000n);
     });
 
     it('handles very large amounts', () => {

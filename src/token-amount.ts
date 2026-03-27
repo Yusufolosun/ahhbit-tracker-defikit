@@ -3,6 +3,19 @@
  * Handles human-readable ↔ raw integer conversions without floating-point errors.
  */
 
+function assertNonNegativeInteger(name: string, value: number): void {
+  if (!Number.isInteger(value) || value < 0) {
+    throw new RangeError(`${name} must be a non-negative integer, got ${value}`);
+  }
+}
+
+function assertHumanAmountString(amount: string): void {
+  const validPattern = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/;
+  if (!validPattern.test(amount)) {
+    throw new SyntaxError(`Invalid amount string: ${amount}`);
+  }
+}
+
 /**
  * Convert a human-readable amount string to raw integer (bigint).
  * Avoids floating-point by parsing the string directly.
@@ -10,15 +23,18 @@
  * Example: fromHuman('1.5', 6) → 1_500_000n
  */
 export function fromHuman(amount: string, decimals: number): bigint {
+  assertNonNegativeInteger('decimals', decimals);
   const trimmed = amount.trim();
   if (trimmed === '' || trimmed === '.') return 0n;
+  assertHumanAmountString(trimmed);
 
   const negative = trimmed.startsWith('-');
-  const abs = negative ? trimmed.slice(1) : trimmed;
+  const abs = negative || trimmed.startsWith('+') ? trimmed.slice(1) : trimmed;
 
   const [intPart = '0', fracPart = ''] = abs.split('.');
+  const normalizedIntPart = intPart === '' ? '0' : intPart;
   const paddedFrac = fracPart.padEnd(decimals, '0').slice(0, decimals);
-  const raw = BigInt(intPart + paddedFrac);
+  const raw = BigInt(normalizedIntPart + paddedFrac);
   return negative ? -raw : raw;
 }
 
@@ -28,6 +44,7 @@ export function fromHuman(amount: string, decimals: number): bigint {
  * Example: toHuman(1_500_000n, 6) → '1.5'
  */
 export function toHuman(amount: bigint, decimals: number): string {
+  assertNonNegativeInteger('decimals', decimals);
   if (decimals === 0) return amount.toString();
 
   const negative = amount < 0n;
@@ -49,6 +66,10 @@ export function format(
   decimals: number,
   displayDecimals?: number,
 ): string {
+  assertNonNegativeInteger('decimals', decimals);
+  if (displayDecimals !== undefined) {
+    assertNonNegativeInteger('displayDecimals', displayDecimals);
+  }
   if (decimals === 0) return amount.toString();
 
   const negative = amount < 0n;
@@ -77,6 +98,8 @@ export function scale(
   fromDecimals: number,
   toDecimals: number,
 ): bigint {
+  assertNonNegativeInteger('fromDecimals', fromDecimals);
+  assertNonNegativeInteger('toDecimals', toDecimals);
   const diff = toDecimals - fromDecimals;
   if (diff > 0) return amount * 10n ** BigInt(diff);
   if (diff < 0) return amount / 10n ** BigInt(-diff);
