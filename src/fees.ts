@@ -26,6 +26,18 @@ export interface FeeTier {
 
 const BPS_DIVISOR = 10_000n;
 
+function assertNonNegativeAmount(name: string, amount: bigint): void {
+  if (amount < 0n) {
+    throw new RangeError(`${name} must be non-negative, got ${amount}`);
+  }
+}
+
+function assertBps(name: string, bps: number, max: number): void {
+  if (!Number.isInteger(bps) || bps < 0 || bps > max) {
+    throw new RangeError(`${name} must be an integer 0–${max}, got ${bps}`);
+  }
+}
+
 /**
  * Fee-on-input: fee is deducted from the input amount.
  * net = amount - fee, where fee = floor(amount * bps / 10000)
@@ -33,9 +45,8 @@ const BPS_DIVISOR = 10_000n;
  * Example: onInput(1_000_000n, 30) → { fee: 3_000n, net: 997_000n }
  */
 export function onInput(amount: bigint, bps: number): FeeResult {
-  if (!Number.isInteger(bps) || bps < 0 || bps > 10_000) {
-    throw new RangeError(`bps must be an integer 0–10000, got ${bps}`);
-  }
+  assertNonNegativeAmount('amount', amount);
+  assertBps('bps', bps, 10_000);
   const fee = (amount * BigInt(bps)) / BPS_DIVISOR;
   return { fee, net: amount - fee };
 }
@@ -48,9 +59,8 @@ export function onInput(amount: bigint, bps: number): FeeResult {
  * Example: onOutput(997_000n, 30) → { fee: 3_009n, gross: 1_000_009n }
  */
 export function onOutput(amount: bigint, bps: number): GrossFeeResult {
-  if (!Number.isInteger(bps) || bps < 0 || bps >= 10_000) {
-    throw new RangeError(`bps must be an integer 0–9999, got ${bps}`);
-  }
+  assertNonNegativeAmount('amount', amount);
+  assertBps('bps', bps, 9_999);
   const denom = BPS_DIVISOR - BigInt(bps);
   // ceiling division: (a + b - 1) / b
   const gross = (amount * BPS_DIVISOR + denom - 1n) / denom;
@@ -76,6 +86,32 @@ export function tiered(amount: bigint, tiers: FeeTier[]): FeeResult {
   if (!tiers.length) {
     throw new Error('At least one fee tier is required');
   }
+  assertNonNegativeAmount('amount', amount);
+
+  let prevThreshold = 0n;
+  let hasUnlimitedTier = false;
+
+  for (let i = 0; i < tiers.length; i++) {
+    const tier = tiers[i];
+    assertBps(`tiers[${i}].bps`, tier.bps, 10_000);
+    if (tier.threshold < 0n) {
+      throw new RangeError(`tiers[${i}].threshold must be non-negative, got ${tier.threshold}`);
+    }
+
+    if (tier.threshold === 0n) {
+      if (i !== tiers.length - 1) {
+        throw new RangeError('Unlimited tier (threshold 0n) must be the last tier');
+      }
+      hasUnlimitedTier = true;
+      continue;
+    }
+
+    if (tier.threshold <= prevThreshold) {
+      throw new RangeError('Tier thresholds must be strictly increasing, with 0n only as final catch-all');
+    }
+    prevThreshold = tier.threshold;
+  }
+
   let remaining = amount;
   let totalFee = 0n;
   let prev = 0n;
@@ -90,6 +126,10 @@ export function tiered(amount: bigint, tiers: FeeTier[]): FeeResult {
     totalFee += (taxable * BigInt(tier.bps)) / BPS_DIVISOR;
     remaining -= taxable;
     prev = tier.threshold;
+  }
+
+  if (remaining > 0n && !hasUnlimitedTier) {
+    throw new RangeError('Tier schedule must include a final threshold of 0n to cover all amounts');
   }
 
   return { fee: totalFee, net: amount - totalFee };

@@ -50,6 +50,10 @@ describe('fees', () => {
     it('throws on bps > 10000', () => {
       expect(() => fees.onInput(1_000_000n, 10_001)).toThrow(RangeError);
     });
+
+    it('throws on negative amount', () => {
+      expect(() => fees.onInput(-1n, 30)).toThrow(RangeError);
+    });
   });
 
   describe('onOutput', () => {
@@ -74,6 +78,10 @@ describe('fees', () => {
 
     it('throws on negative bps', () => {
       expect(() => fees.onOutput(1_000_000n, -1)).toThrow(RangeError);
+    });
+
+    it('throws on negative amount', () => {
+      expect(() => fees.onOutput(-1n, 30)).toThrow(RangeError);
     });
   });
 
@@ -117,6 +125,45 @@ describe('fees', () => {
 
     it('throws on empty tiers array', () => {
       expect(() => fees.tiered(1_000_000n, [])).toThrow('At least one fee tier is required');
+    });
+
+    it('throws on negative amount', () => {
+      expect(() => fees.tiered(-1n, [{ threshold: 0n, bps: 30 }])).toThrow(RangeError);
+    });
+
+    it('throws on non-increasing thresholds', () => {
+      expect(() =>
+        fees.tiered(1_000_000n, [
+          { threshold: 1_000_000n, bps: 50 },
+          { threshold: 1_000_000n, bps: 30 },
+          { threshold: 0n, bps: 20 },
+        ]),
+      ).toThrow(RangeError);
+    });
+
+    it('throws when unlimited tier is not last', () => {
+      expect(() =>
+        fees.tiered(1_000_000n, [
+          { threshold: 0n, bps: 30 },
+          { threshold: 2_000_000n, bps: 20 },
+        ]),
+      ).toThrow(RangeError);
+    });
+
+    it('throws when tiers do not fully cover amount', () => {
+      expect(() =>
+        fees.tiered(2_000_000n, [
+          { threshold: 1_000_000n, bps: 30 },
+        ]),
+      ).toThrow(RangeError);
+    });
+
+    it('throws on invalid tier bps', () => {
+      expect(() =>
+        fees.tiered(1_000_000n, [
+          { threshold: 0n, bps: 10_001 },
+        ]),
+      ).toThrow(RangeError);
     });
   });
 });
