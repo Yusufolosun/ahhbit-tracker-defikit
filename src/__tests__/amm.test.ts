@@ -27,6 +27,12 @@ describe('amm.constantProduct', () => {
       expect(constantProduct.getOutputAmount(1_000n, reserveIn, 0n)).toBe(0n);
     });
 
+    it('throws on invalid fee bps', () => {
+      expect(() => constantProduct.getOutputAmount(1_000n, reserveIn, reserveOut, -1)).toThrow(RangeError);
+      expect(() => constantProduct.getOutputAmount(1_000n, reserveIn, reserveOut, 10_000)).toThrow(RangeError);
+      expect(() => constantProduct.getOutputAmount(1_000n, reserveIn, reserveOut, 0.5)).toThrow(RangeError);
+    });
+
     it('large trade gets worse price (constant product curve)', () => {
       const small = constantProduct.getOutputAmount(1_000_000n, reserveIn, reserveOut);
       const large = constantProduct.getOutputAmount(100_000_000n, reserveIn, reserveOut);
@@ -58,6 +64,12 @@ describe('amm.constantProduct', () => {
     it('returns 0 for zero or excessive output', () => {
       expect(constantProduct.getInputAmount(0n, reserveIn, reserveOut)).toBe(0n);
       expect(constantProduct.getInputAmount(reserveOut, reserveIn, reserveOut)).toBe(0n);
+    });
+
+    it('throws on invalid fee bps', () => {
+      expect(() => constantProduct.getInputAmount(1_000n, reserveIn, reserveOut, -1)).toThrow(RangeError);
+      expect(() => constantProduct.getInputAmount(1_000n, reserveIn, reserveOut, 10_000)).toThrow(RangeError);
+      expect(() => constantProduct.getInputAmount(1_000n, reserveIn, reserveOut, 1.5)).toThrow(RangeError);
     });
   });
 
@@ -104,6 +116,11 @@ describe('amm.constantProduct', () => {
 
     it('returns 0 for zero reserves', () => {
       expect(constantProduct.spotPrice(0n, 1_000n, 6, 6)).toBe(0);
+    });
+
+    it('throws on invalid decimals', () => {
+      expect(() => constantProduct.spotPrice(1_000n, 2_000n, -1, 6)).toThrow(RangeError);
+      expect(() => constantProduct.spotPrice(1_000n, 2_000n, 6, 1.5)).toThrow(RangeError);
     });
   });
 });

@@ -6,6 +6,18 @@
 
 const BPS_DIVISOR = 10_000n;
 
+function assertFeeBps(feeBps: number): void {
+  if (!Number.isInteger(feeBps) || feeBps < 0 || feeBps >= 10_000) {
+    throw new RangeError(`feeBps must be an integer 0–9999, got ${feeBps}`);
+  }
+}
+
+function assertNonNegativeInteger(name: string, value: number): void {
+  if (!Number.isInteger(value) || value < 0) {
+    throw new RangeError(`${name} must be a non-negative integer, got ${value}`);
+  }
+}
+
 export const constantProduct = {
   /**
    * Calculate output amount for a given input (x*y=k).
@@ -20,6 +32,7 @@ export const constantProduct = {
     reserveOut: bigint,
     feeBps = 0,
   ): bigint {
+    assertFeeBps(feeBps);
     if (amountIn <= 0n || reserveIn <= 0n || reserveOut <= 0n) return 0n;
 
     const effectiveIn =
@@ -44,6 +57,7 @@ export const constantProduct = {
     reserveOut: bigint,
     feeBps = 0,
   ): bigint {
+    assertFeeBps(feeBps);
     if (amountOut <= 0n || reserveIn <= 0n || reserveOut <= amountOut) return 0n;
 
     const numerator = reserveIn * amountOut;
@@ -92,6 +106,8 @@ export const constantProduct = {
     decimalsIn: number,
     decimalsOut: number,
   ): number {
+    assertNonNegativeInteger('decimalsIn', decimalsIn);
+    assertNonNegativeInteger('decimalsOut', decimalsOut);
     if (reserveIn === 0n) return 0;
     const scale = 10 ** (decimalsOut - decimalsIn);
     return (Number(reserveOut) / Number(reserveIn)) * scale;
